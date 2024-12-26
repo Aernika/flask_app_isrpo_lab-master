@@ -1,0 +1,124 @@
+openapi: 3.0.0
+info:
+  title: Musical catalog API
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000
+
+paths:
+  /songs:
+    get:
+      summary: Get all songs
+      responses:
+        '200':
+          description: Successful response with list of all songs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Song'
+    post:
+      summary: Add song
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SongInput'
+      responses:
+        '201':
+          description: Song added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Song'
+
+  /songs/{songId}:
+    get:
+      summary: Get song by ID
+      parameters:
+        - name: songId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with information about song
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Song'
+        '404':
+          description: Song not found
+
+    put:
+      summary: Update song information
+      parameters:
+        - name: songId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SongInput'
+      responses:
+        '200':
+          description: Song information updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Song'
+        '404':
+          description: Song not found
+
+    delete:
+      summary: Delete song by ID
+      parameters:
+        - name: songId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Song deleted
+        '404':
+          description: Song not found
+
+components:
+  schemas:
+    Song:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "12345"
+        title:
+          type: string
+          example: "We will rock you"
+        author:
+          type: string
+          example: "Queen"
+        genre:
+          type: string
+          example: "rock"
+        year:
+          type: integer
+          example: 1977
+    SongInput:
+      type: object
+      properties:
+        title:
+          type: string
+        author:
+          type: string
+        genre:
+          type: string
+        year:
+          type: integer

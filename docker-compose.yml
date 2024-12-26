@@ -1,0 +1,82 @@
+services:
+  flask-app:
+    build: .
+    container_name: flask-app
+    ports:
+      - "5000:5000"
+    networks:
+      - monitoring
+    volumes:
+      - .:/app
+    restart: always
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+    restart: always
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-remote-write-receiver
+      - --enable-feature=exemplar-storage
+      - --enable-feature=native-histograms
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "8080:8080"
+    networks:
+      - monitoring
+    restart: always
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
+  loki:
+    image: grafana/loki
+    container_name: loki
+    ports:
+      - "3100:3100"
+    networks:
+      - monitoring
+    restart: always
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
+      - ./loki-data:/var/loki
+
+  promtail:
+    image: grafana/promtail
+    container_name: promtail
+    networks:
+      - monitoring
+    restart: always
+    volumes:
+      - ./promtail-config.yaml:/etc/promtail/promtail-config.yaml
+      - ./app.log:/var/log/app.log
+
+  tempo:
+    image: grafana/tempo
+    container_name: tempo
+    networks:
+      - monitoring
+    restart: always
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./tempo.yaml:/etc/tempo.yaml
+      - ./tempo-data:/tmp/tempo
+    ports:
+      - "4317:4317"    # OTLP receiver port
+      - "3200:3200"   # tempo
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  grafana-storage:
