@@ -7,7 +7,7 @@ def client():
     app.testing = True
     return app.test_client()
 
-# def test_get_books(client):
+# def test_get_songs(client):
 #     response = client.get('/songs')
 #     assert response.status_code == 200
 #     assert isinstance(response.json, list)
